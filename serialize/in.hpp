@@ -3,10 +3,14 @@
 # define SERIALIZE_IN_HPP_
 
 # include <string>
+# include <vector>
+# include <list>
+# include <map>
 # include <cstring>
 # include <fstream>
 # include <stdexcept>
 
+#include <iostream>
 namespace serialize {
 
 /**
@@ -63,24 +67,12 @@ public:
   }
 
   /**
-   * Deserialize the next string.
-   * @param field The string field to fill.
-   */
-  void deserialize(std::string &field) {
-    while (_getCurrentByte() != '\0') {
-      field += _getCurrentByte();
-      _increaseCounter(1);
-    }
-    _increaseCounter(1);
-  }
-
-  /**
    * Deserialize the next data.
    * @param field The data field to fill.
    */
   template<typename T>
   void deserialize(T &field) {
-    unsigned int size = sizeof(field);
+    size_t size = sizeof(field);
     if (_counter + size > _size)
       throw std::out_of_range("Cannot read data.");
     std::memcpy(
@@ -89,6 +81,86 @@ public:
       size
     );
     _increaseCounter(size);
+  }
+
+  /**
+   * Deserialize the next string.
+   * @param field The string field to fill.
+   */
+  void deserialize(std::string &field) {
+    field.clear();
+    while (_getCurrentByte() != '\0') {
+      field += _getCurrentByte();
+      _increaseCounter(1);
+    }
+    _increaseCounter(1);
+  }
+
+  /**
+   * Deserialize the next vector.
+   * @param field The string field to fill.
+   */
+  template<typename T>
+  void deserialize(std::vector<T> &field) {
+    if (_counter + sizeof(size_t) > _size)
+      throw std::out_of_range("Cannot read data.");
+    size_t size;
+    std::memcpy(&size, _buffer + _counter, sizeof(size_t));
+    _increaseCounter(sizeof(size_t));
+    field.clear();
+    T f;
+    for (size_t i = 0; i < size; ++i) {
+      deserialize(f);
+      field.push_back(std::move(f));
+    }
+  }
+
+  /**
+   * Deserialize the next list.
+   * @param field The string field to fill.
+   */
+  template<typename T>
+  void deserialize(std::list<T> &field) {
+    if (_counter + sizeof(size_t) > _size)
+      throw std::out_of_range("Cannot read data.");
+    size_t size;
+    std::memcpy(&size, _buffer + _counter, sizeof(size_t));
+    _increaseCounter(sizeof(size_t));
+    field.clear();
+    T f;
+    for (size_t i = 0; i < size; ++i) {
+      deserialize(f);
+      field.push_back(std::move(f));
+    }
+  }
+
+  /**
+   * Deserialize the next pair.
+   * @param field The string field to fill.
+   */
+  template<typename Key, typename Value>
+  void deserialize(std::pair<Key, Value> &field) {
+    deserialize(field.first);
+    deserialize(field.second);
+  }
+
+  /**
+   * Deserialize the next map.
+   * @param field The string field to fill.
+   */
+  template<typename Key, typename Value>
+  void deserialize(std::map<Key, Value> &field) {
+    if (_counter + sizeof(size_t) > _size)
+      throw std::out_of_range("Cannot read data.");
+    size_t size;
+    std::memcpy(&size, _buffer + _counter, sizeof(size_t));
+    _increaseCounter(sizeof(size_t));
+    field.clear();
+    std::pair<Key, Value> f;
+    for (size_t i = 0; i < size; ++i) {
+      deserialize(f);
+      field[f.first] = f.second;
+    }
   }
 
   /**

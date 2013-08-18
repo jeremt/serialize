@@ -3,40 +3,44 @@
 #include "Message.hpp"
 
 Message::Message()
-: id(0)
+: name("anonymous")
 , text("")
 , next(0)
 {}
 
 Message::Message(Message *ne)
-: id(0)
+: name("anonymous")
 , text("")
 , next(ne)
 {}
 
-Message::Message(size_t id, std::string const &txt, Message *ne)
-: id(id)
-, text(txt)
+Message::Message(
+  std::string const &n,
+  std::string const &t,
+  Message *ne
+)
+: name(n)
+, text(t)
 , next(ne)
 {}
 
 void Message::serialize(serialize::out &out)
 {
-  out << id << text;
+  out << name << text;
   if (next)
     next->serialize(out);
 }
 
 void Message::deserialize(serialize::in &in)
 {
-  in >> id >> text;
+  in >> name >> text;
   if (next)
     next->deserialize(in);
 }
 
 void Message::print()
 {
-  std::cout << "  " << id << "> " << text << std::endl;
+  std::cout << "  " << name << "> " << text << std::endl;
   if (next)
     next->print();
 }

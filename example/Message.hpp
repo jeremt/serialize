@@ -11,12 +11,16 @@
  * Simple structure to test chainable serialization.
  */
 struct Message {
-  size_t id;
+  std::string name;
   std::string text;
   Message *next;
   Message();
   Message(Message *ne);
-  Message(size_t id, std::string const &message, Message *ne = NULL);
+  Message(
+    std::string const &n,
+    std::string const &t,
+    Message *ne = NULL
+  );
   void serialize(serialize::out &out);
   void deserialize(serialize::in &in);
   void print();

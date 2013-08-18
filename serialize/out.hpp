@@ -2,6 +2,9 @@
 #ifndef SERIALIZE_OUT_HPP_
 # define SERIALIZE_OUT_HPP_
 
+# include <vector>
+# include <list>
+# include <map>
 # include <string>
 # include <fstream>
 # include <cstring>
@@ -65,18 +68,6 @@ public:
   }
 
   /**
-   * Serialize the given string field.
-   */
-  void serialize(std::string const &field) {
-    std::string tmp = field + '\0';
-    unsigned int size = sizeof(char) * tmp.length();
-    if (_size + size >= _capacity)
-      _resize();
-    memcpy(_buffer + _size, tmp.c_str(), size);
-    _size += size;
-  }
-
-  /**
    * Serialize the given data.
    */
   template<typename T>
@@ -84,8 +75,71 @@ public:
     unsigned int size = sizeof(T);
     if(_size + size >= _capacity)
       _resize();
-    memcpy(_buffer + _size, (char*)&value, size);
+    std::memcpy(_buffer + _size, (char*)&value, size);
     _size += size;
+  }
+
+  /**
+   * Serialize the given string field.
+   */
+  void serialize(std::string const &field) {
+    std::string tmp = field + '\0';
+    unsigned int size = sizeof(char) * tmp.length();
+    if (_size + size >= _capacity)
+      _resize();
+    std::memcpy(_buffer + _size, tmp.c_str(), size);
+    _size += size;
+  }
+
+  /**
+   * Serialize the given vector field.
+   */
+  template<typename T>
+  void serialize(std::vector<T> const &field) {
+    if (_size + sizeof(size_t) >= _capacity)
+      _resize();
+    size_t size = field.size();
+    std::memcpy(_buffer + _size, &size, sizeof(size_t));
+    _size += sizeof(size_t);
+    for (auto f : field)
+      serialize(f);
+  }
+
+  /**
+   * Serialize the given list field.
+   */
+  template<typename T>
+  void serialize(std::list<T> const &field) {
+    if (_size + sizeof(size_t) >= _capacity)
+      _resize();
+    size_t size = field.size();
+    std::memcpy(_buffer + _size, &size, sizeof(size_t));
+    _size += sizeof(size_t);
+    for (auto f : field)
+      serialize(f);
+  }
+
+  /**
+   * Serialize the given pair field.
+   */
+  template<typename Key, typename Value>
+  void serialize(std::pair<Key, Value> const &field) {
+    serialize(field.first);
+    serialize(field.second);
+  }
+
+  /**
+   * Serialize the given map field.
+   */
+  template<typename Key, typename Value>
+  void serialize(std::map<Key, Value> const &field) {
+    if (_size + sizeof(size_t) >= _capacity)
+      _resize();
+    size_t size = field.size();
+    std::memcpy(_buffer + _size, &size, sizeof(size_t));
+    _size += sizeof(size_t);
+    for (auto f : field)
+      serialize(f);
   }
 
   /**

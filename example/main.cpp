@@ -14,11 +14,13 @@ static void testSerialize()
   settings.size = 5;
   settings.isOnline = true;
   settings.percent = 42.21f;
+  settings.addresses["titi "] = "21bis rue des tulipes";
+
   settings.serialize(settingsStream);
   // message
   serialize::out msgStream("messages.bin");
-  Message next(42, "Hi guys!");
-  Message msg(21, "Hello ;)", &next);
+  Message next("titi", "Hi guys!");
+  Message msg("bob", "Hello ;)", &next);
   msg.serialize(msgStream);
 }
 
