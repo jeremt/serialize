@@ -1,52 +1,61 @@
+
+#include <type_traits>
 #include <iostream>
 
-namespace detail {
+class out;
 
-  // SFINAE test
-  template<typename Obj>
-  class has_serialize {
-    typedef char true_t;
-    typedef int false_t;
-    template <typename C> static true_t test(typeof(&C::serialize));
-    template <typename C> static false_t test(...);
-  public:
-    enum {value = sizeof(test<Obj>(0)) == sizeof(true_t)};
-  };
+// namespace detail {
+  template<typename T>
+  auto _serialize(out& os, T const& obj, long)
+      -> decltype(obj, void()) {
+    std::cout << "no method, address is: " << &obj << std::endl;
+  }
+   
+  template<typename T>
+  auto _serialize(out& os, T const& obj, int)
+      -> decltype(obj.serialize(os), void()) {
+    obj.serialize(os);
+  }
+// }
 
-  template<typename Obj>
-  class try_serialize {
-    // TODO
-  };
-
-}
-
-// http://stackoverflow.com/questions/10957924/is-there-any-way-to-detect-whether-a-function-exists-and-can-be-used-at-compile
-// http://stackoverflow.com/questions/10957924/is-there-any-way-to-detect-whether-a-function-exists-and-can-be-used-at-compile
-
-template<typename Type>
-void serialize(Type const &field)  {
-  if (detail::has_serialize<Type>::value)
-    std::cout << "From method" << std::endl;
-  else
-    std::cout << "Basic" << std::endl;
-}
-
-class B {
+class out {
+  template<typename T>
+  auto _serialize(out& os, T const& obj)
+      -> decltype(_serialize(os, obj, 0), void()) {
+    ::_serialize(os, obj, 0);
+  }
 public:
-  void serialize() {
-    std::cout << "serialize !!!" << std::endl;
+  int buffer;
+public:
+
+  template<typename T>
+  void serialize(T const &obj) {
+    _serialize(*this, obj);
+  }
+
+  void serialize(std::string const &s) {
+    std::cout << "special case: " << s << std::endl;
   }
 };
 
-// TODO - Find a way to call field.serialize();
-// (template specification from has_serialize::value)
+struct Success {
+  void serialize(out &os) const{
+    std::cout << "serialize, buffer is: " << os.buffer << std::endl;
+  }
+};
 
-int main()
-{
-  int a;
-  B b;
+struct Fail {};
+ 
+int main(){
+  out os;
+  Success success;
+  Fail fail;
+  std::string s = "hello";
 
-  serialize(a);
-  serialize(b);
-  return 0;
+  os.buffer = 42;
+  std::cout << "---" << std::endl; os.serialize(5);
+  std::cout << "---" << std::endl; os.serialize(success);
+  std::cout << "---" << std::endl; os.serialize(fail);
+  std::cout << "---" << std::endl; os.serialize(s);
+  std::cout << "---" << std::endl;
 }
