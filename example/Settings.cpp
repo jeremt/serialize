@@ -2,6 +2,16 @@
 #include <iostream>
 #include "Settings.hpp"
 
+void Address::serialize(serialize::out &out) {
+  out << num << street;
+  std::cout << "Serialize address, num: " << num << std::endl;
+}
+
+void Address::deserialize(serialize::in &in) {
+  in >> num >> street;
+  std::cout << "Deserialize address, num: " << num << std::endl;
+}
+
 Settings::Settings()
 : ids{1, 2, 3, 4, 5, 6, 7, 8, 9}
 , pseudos{{1, "bob"}, {2, "titi"}, {3, "toto"}}
@@ -14,8 +24,8 @@ Settings::Settings()
     {'x', 'x', 'x'}
   })
 , addresses({
-    {"bob  ", "42 rue des lilas"},
-    {"toto ", "1337 rue des lavandes"}
+    {"bob  ", {42, "rue des lilas"}},
+    {"toto ", {1337, "rue des lavandes"}}
   })
 {}
 
@@ -55,6 +65,7 @@ void Settings::print() {
   for (auto addr : addresses)
     std::cout << "             "
               << addr.first << " "
-              << addr.second                << std::endl;
+              << addr.second.num << " "
+              << addr.second.street           << std::endl;
   std::cout << std::endl;
 }

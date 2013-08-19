@@ -6,7 +6,7 @@ project(Serialize)
 
 # Compilation flags
 
-set(CMAKE_CXX_FLAGS "-Wall -Wextra -Werror -std=c++0x")
+set(CMAKE_CXX_FLAGS "-std=c++0x")
 
 # Set sources from all .cpp files in sources/ folder.
 

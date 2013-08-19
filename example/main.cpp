@@ -14,7 +14,8 @@ static void testSerialize()
   settings.size = 5;
   settings.isOnline = true;
   settings.percent = 42.21f;
-  settings.addresses["titi "] = "21bis rue des tulipes";
+  settings.addresses["titi "].num = 21;
+  settings.addresses["titi"].street = "rue des tulipes";
 
   settings.serialize(settingsStream);
   // message

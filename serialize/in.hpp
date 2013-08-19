@@ -11,11 +11,14 @@
 # include <stdexcept>
 
 #include <iostream>
+
 namespace serialize {
+
+# include "detail.inl"
 
 /**
  * @class in
- * Used to load binary data from file and serialize the class.
+ * Used to load binary data from file and serialize it.
  */
 class in {
 public:
@@ -70,8 +73,8 @@ public:
    * Deserialize the next data.
    * @param field The data field to fill.
    */
-  template<typename T>
-  void deserialize(T &field) {
+  template<typename FieldType>
+  void basicDeserialize(FieldType &field) {
     size_t size = sizeof(field);
     if (_counter + size > _size)
       throw std::out_of_range("Cannot read data.");
@@ -81,6 +84,15 @@ public:
       size
     );
     _increaseCounter(size);
+  }
+
+  /**
+   * Deserialize the next data.
+   * @param field The data field to fill.
+   */
+  template<typename FieldType>
+  void deserialize(FieldType &field) {
+    _deserialize(*this, field);
   }
 
   /**
@@ -166,8 +178,8 @@ public:
   /**
    * Simple stream operator to deserialize.
    */
-  template<typename T>
-  in &operator>>(T &field) {
+  template<typename FieldType>
+  in &operator>>(FieldType &field) {
     deserialize(field);
     return *this;
   }
@@ -189,13 +201,23 @@ private:
   char _getCurrentByte() {
     return (_buffer + _counter)[0];
   }
+
+  /**
+   * Choose the deserialize function to use.
+   */
+  template<typename FieldType>
+  auto _deserialize(in &is, FieldType &field)
+      -> decltype(detail::_deserialize(is, field, 0), void()) {
+    detail::_deserialize(is, field, 0);
+  }
+
 private:
   std::ifstream _file;
-  char* _buffer;
+  char *_buffer;
   size_t _size;
   size_t _counter;
 };
 
-}
+} // !serialize::
 
 #endif // !SERIALIZE_IN_HPP_

@@ -11,6 +11,12 @@
 
 namespace serialize {
 
+# include "detail.inl"
+
+/**
+ * @class out
+ * Used to serialize data and save it into a binary file.
+ */
 class out {
 public:
   /**
@@ -68,15 +74,23 @@ public:
   }
 
   /**
-   * Serialize the given data.
+   * Basicaly serialize the given data.
    */
-  template<typename T>
-  void serialize(T const &value) {
-    unsigned int size = sizeof(T);
+  template<typename FieldType>
+  void basicSerialize(FieldType const &field) {
+    unsigned int size = sizeof(FieldType);
     if(_size + size >= _capacity)
       _resize();
-    std::memcpy(_buffer + _size, (char*)&value, size);
+    std::memcpy(_buffer + _size, (char*)&field, size);
     _size += size;
+  }
+
+  /**
+   * Serialize the given data.
+   */
+  template<typename FieldType>
+  void serialize(FieldType const &field) {
+    _serialize(*this, field);
   }
 
   /**
@@ -145,13 +159,14 @@ public:
   /**
    * Use stream operator the serialize field.
    */
-  template<typename T>
-  out &operator<<(T const &field) {
+  template<typename FieldType>
+  out &operator<<(FieldType const &field) {
     serialize(field);
     return *this;
   }
 
 private:
+
   /**
    * Resize the buffer.
    */
@@ -162,6 +177,15 @@ private:
     delete[] _buffer;
     _buffer = newBuffer;
   }
+
+  /**
+   * Choose the serialize function to use.
+   */
+  template<typename FieldType>
+  auto _serialize(out& os, FieldType const &field)
+      -> decltype(detail::_serialize(os, field, 0), void()) {
+    detail::_serialize(os, field, 0);
+  }
 private:
   static const unsigned int DEFAULT_CAPACITY = 128;
   std::ofstream _file;
@@ -170,6 +194,6 @@ private:
   size_t _size;
 };
 
-}
+} // !serialize::
 
 #endif // !SERIALIZE_OUT_HPP_

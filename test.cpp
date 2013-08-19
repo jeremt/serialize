@@ -1,53 +1,36 @@
 
-#include <type_traits>
 #include <iostream>
+#include "out_test.hpp"
 
-class out;
+// template<class T> struct has_serialize
+// {
+//     typedef char (&Yes)[1];
+//     typedef char (&No)[2];
 
-// namespace detail {
-  template<typename T>
-  auto _serialize(out& os, T const& obj, long)
-      -> decltype(obj, void()) {
-    std::cout << "no method, address is: " << &obj << std::endl;
-  }
-   
-  template<typename T>
-  auto _serialize(out& os, T const& obj, int)
-      -> decltype(obj.serialize(os), void()) {
-    obj.serialize(os);
-  }
-// }
+//     template<class U>
+//     static Yes test(U * data, MyClass* arg1 = 0,
+//                     typename std::enable_if<std::is_void<
+//                              decltype(data->serialize(*arg1, 1u))
+//                     >::value>::type * = 0) {
+//       std::cout << "Has" << std::Endl;
+//     }
 
-class out {
-  template<typename T>
-  auto _serialize(out& os, T const& obj)
-      -> decltype(_serialize(os, obj, 0), void()) {
-    ::_serialize(os, obj, 0);
-  }
-public:
-  int buffer;
-public:
-
-  template<typename T>
-  void serialize(T const &obj) {
-    _serialize(*this, obj);
-  }
-
-  void serialize(std::string const &s) {
-    std::cout << "special case: " << s << std::endl;
-  }
-};
+//     static No test(...) {
+//       std::cout << "Default" << std::endl;
+//     }
+//     static const bool value = sizeof(Yes) == sizeof(has_serialize::test((typename std::remove_reference<T>::type*)0));
+// };
 
 struct Success {
-  void serialize(out &os) const{
-    std::cout << "serialize, buffer is: " << os.buffer << std::endl;
+  void serialize(serialize::out &os) const{
+    std::cout << "serialize from method" << std::endl;
   }
 };
 
 struct Fail {};
  
 int main(){
-  out os;
+  serialize::out os;
   Success success;
   Fail fail;
   std::string s = "hello";

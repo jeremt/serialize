@@ -10,9 +10,9 @@
  */
 struct Address {
   size_t num;
-  std::string road;
-  std::string city;
-  size_t zipCode;
+  std::string street;
+  void serialize(serialize::out &out);
+  void deserialize(serialize::in &in);
 };
 
 /**
@@ -28,7 +28,7 @@ struct Settings {
   bool isOnline;
   float percent;
   std::vector<std::vector<char>> square;
-  std::map<std::string, std::string> addresses;
+  std::map<std::string, Address> addresses;
   Settings();
   void serialize(serialize::out &out);
   void deserialize(serialize::in &in);
