@@ -23,6 +23,13 @@ static void testSerialize()
   Message next("titi", "Hi guys!");
   Message msg("bob", "Hello ;)", &next);
   msg.serialize(msgStream);
+
+
+  // addresses
+  serialize::out addrStream("test.bin");
+  Address addr = {50, "rue des fleurs"};
+  addrStream.serialize(addr); // addr.serialize() should be called.
+  addr.print();
 }
 
 static void testDeserialize()
@@ -39,6 +46,14 @@ static void testDeserialize()
   msg.deserialize(msgStream);
   msg.print();
   std::cout << std::endl;
+
+  // serialize::in addrStream;
+  // std::list<Address> addrList;
+  // addrStream.deserialize(addrList);
+  // for (auto addr : addrList)
+  //   std::cout << addr.num << " " << addr.street << std::endl;
+
+
 }
 
 /**

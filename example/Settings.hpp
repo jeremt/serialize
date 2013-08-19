@@ -13,6 +13,7 @@ struct Address {
   std::string street;
   void serialize(serialize::out &out);
   void deserialize(serialize::in &in);
+  void print();
 };
 
 /**

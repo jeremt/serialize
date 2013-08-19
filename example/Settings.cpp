@@ -12,6 +12,10 @@ void Address::deserialize(serialize::in &in) {
   std::cout << "Deserialize address, num: " << num << std::endl;
 }
 
+void Address::print() {
+  std::cout << num << " " << street << std::endl;
+}
+
 Settings::Settings()
 : ids{1, 2, 3, 4, 5, 6, 7, 8, 9}
 , pseudos{{1, "bob"}, {2, "titi"}, {3, "toto"}}
